@@ -1,21 +1,49 @@
 import numpy as np
 import log_cholesky_parameterization
 
+def compute_J(U):
+    return U @ U.T
+
+def logchol2chol(theta):
+    alpha, d1, d2, d3, s12, s13, s23, t1, t2, t3 = theta
+    e_alpha = np.exp(alpha)
+    U = np.zeros((4, 4))
+    U[0, 0] = e_alpha * np.exp(d1)
+    U[0, 1] = e_alpha * s12
+    U[0, 2] = e_alpha * s13
+    U[0, 3] = e_alpha * t1
+    U[1, 1] = e_alpha * np.exp(d2)
+    U[1, 2] = e_alpha * s23
+    U[1, 3] = e_alpha * t2
+    U[2, 2] = e_alpha * np.exp(d3)
+    U[2, 3] = e_alpha * t3
+    U[3, 3] = e_alpha
+    return U
+
+def pseudo2pi(J):
+    m = J[3, 3]
+    h = J[:3, 3]
+    Sigma = J[:3, :3]
+    trace_sigma = np.trace(Sigma)
+    I_bar = trace_sigma * np.eye(3) - Sigma
+    I_xx, I_yy, I_zz = I_bar[0, 0], I_bar[1, 1], I_bar[2, 2]
+    I_xy, I_xz, I_yz = -I_bar[0, 1], -I_bar[0, 2], -I_bar[1, 2]  # 부호
+    return np.array([m, *h, I_xx, I_yy, I_zz, I_xy, I_xz, I_yz])
 
 def numerical_gradient(theta, samples, epsilon=1e-6):
     grad = np.zeros_like(theta)
-    base_U = log_cholesky_parameterization.logchol2chol(theta)
-    base_J = log_cholesky_parameterization.compute_J(base_U)
-    base_pi = log_cholesky_parameterization.pseudo2pi(base_J)
+    base_U = logchol2chol(theta)
+    base_J = compute_J(base_U)
+    base_pi = pseudo2pi(base_J)
     base_cost = sum(0.5 * np.sum((s['Y'] @ base_pi - s['force'])**2) for s in samples)
 
     for i in range(len(theta)):
         theta_eps = np.copy(theta)
         theta_eps[i] += epsilon
 
-        U_eps = log_cholesky_parameterization.logchol2chol(theta_eps)
-        J_eps = log_cholesky_parameterization.compute_J(U_eps)
-        pi_eps = log_cholesky_parameterization.pseudo2pi(J_eps)
+        U_eps = logchol2chol(theta_eps)
+        J_eps = compute_J(U_eps)
+        pi_eps = pseudo2pi(J_eps)
         cost_eps = sum(0.5 * np.sum((s['Y'] @ pi_eps - s['force'])**2) for s in samples)
 
         grad[i] = (cost_eps - base_cost) / epsilon
@@ -92,7 +120,7 @@ def compute_jacobian_logcholesky(theta):
 
     return J
 
-def log_estimate_inertial_parameters(samples, learning_rate, max_iter, gradient_method=None, true_pi=None):
+def log_estimate_inertial_parameters(samples, learning_rate, max_iter, gradient_method, true_pi):
     theta = np.array([
             0,                   # alpha = log(sqrt(1))
             0.1, 0.1, -0.8,      # d_i
@@ -113,9 +141,9 @@ def log_estimate_inertial_parameters(samples, learning_rate, max_iter, gradient_
             grad_pi += Y.T @ e
             cost += 0.5 * np.sum(e**2)
 
-        if gradient_method == "numerical_grad":
+        if gradient_method == True:
             grad_theta = numerical_gradient(theta, samples)
-        elif gradient_method == "analytical_grad":
+        elif gradient_method == False:
             J_pi = compute_jacobian_logcholesky(theta)
             grad_theta = J_pi.T @ grad_pi
 
