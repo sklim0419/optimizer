@@ -1,7 +1,7 @@
 import numpy as np
 import sample_data as data
 import MSE
-# import exponential
+import exponential_map
 import log_cholesky
 
 if __name__== "__main__":
@@ -22,10 +22,10 @@ if __name__== "__main__":
     #est_pi= MSE.mse_estimate_inertial_parameters(samples, learning_rate=learning_rate, max_iter=max_iteration, true_pi= true_pi)
     
     """ exponential map """
-    # est_pi = exponential.estimate_inertial_parameters(samples, learning_rate=1e-4, max_iter=10000,numerical_grad=True, true_pi=true_pi)
+    est_pi = exponential_map.estimate_inertial_parameters(samples, learning_rate=learning_rate, max_iter=max_iteration,true_pi=true_pi)
     
     """ log_cholesky """
-    est_pi = log_cholesky.log_estimate_inertial_parameters(samples, learning_rate=learning_rate, max_iter=max_iteration, gradient_method=gradient_method, true_pi=true_pi)
+    #est_pi = log_cholesky.log_estimate_inertial_parameters(samples, learning_rate=learning_rate, max_iter=max_iteration, gradient_method=gradient_method, true_pi=true_pi)
 
 
 
