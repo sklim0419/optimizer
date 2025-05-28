@@ -1,6 +1,4 @@
 import numpy as np
-import log_cholesky
-import log_cholesky_parameterization
 
 def mse_estimate_inertial_parameters(samples, learning_rate, max_iter,true_pi=None):
     N = len(samples)

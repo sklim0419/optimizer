@@ -1,5 +1,4 @@
 import numpy as np
-import log_cholesky_parameterization
 
 def compute_J(U):
     return U @ U.T
@@ -129,9 +128,9 @@ def log_estimate_inertial_parameters(samples, learning_rate, max_iter, gradient_
         ])
 
     for it in range(max_iter):
-        U = log_cholesky_parameterization.logchol2chol(theta)
-        J = log_cholesky_parameterization.compute_J(U)
-        pi = log_cholesky_parameterization.pseudo2pi(J)
+        U = logchol2chol(theta)
+        J = compute_J(U)
+        pi = pseudo2pi(J)
 
         grad_pi = np.zeros(10)
         cost = 0
@@ -151,17 +150,17 @@ def log_estimate_inertial_parameters(samples, learning_rate, max_iter, gradient_
         theta -= learning_rate * grad_theta
 
         if it % 100==0:
-            U = log_cholesky_parameterization.logchol2chol(theta)
-            J = log_cholesky_parameterization.compute_J(U)
-            est_pi =log_cholesky_parameterization.pseudo2pi(J)
+            U = logchol2chol(theta)
+            J = compute_J(U)
+            est_pi =pseudo2pi(J)
             print("\n[Iteration ",it,"]")
             print("[True Inertial Parameters]\n", true_pi)
             print("[Estimated Inertial Parameters]\n", est_pi)
             print("[Relative Error (%)]\n", 100 * np.abs((est_pi - true_pi) / true_pi))
 
-    U = log_cholesky_parameterization.logchol2chol(theta)
-    J = log_cholesky_parameterization.compute_J(U)
-    est_pi =log_cholesky_parameterization.pseudo2pi(J)
+    U = logchol2chol(theta)
+    J = compute_J(U)
+    est_pi =pseudo2pi(J)
     print("\n[Final]")
     print("[True Inertial Parameters]\n", true_pi)
     print("[Estimated Inertial Parameters]\n", est_pi)
