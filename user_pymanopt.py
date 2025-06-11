@@ -26,9 +26,9 @@ def pseudo2pi(J):
     return pi
 
 def estimate_inertial_parameters(samples, true_pi=None, max_iterations=None):
-    manifold = SymmetricPositiveDefinite(n=4)
+    manifold = SymmetricPositiveDefinite(n=4) #최적화 manifold 결정
 
-    @autograd(manifold)
+    @autograd(manifold)     # autograd 데코레이터터
     def cost(J):
         pi = pseudo2pi(J)
         cost_sum = 0.0
@@ -43,8 +43,9 @@ def estimate_inertial_parameters(samples, true_pi=None, max_iterations=None):
     # initialization
     J = anp.eye(4)
 
-    solver = SteepestDescent(max_iterations=max_iterations)
+    solver = SteepestDescent(max_iterations=max_iterations) # optimizer 결정
     result = solver.run(problem, initial_point=J)
+
     J = result.point
     grad_norm = result.gradient_norm
     
