@@ -43,7 +43,7 @@ def estimate_inertial_parameters(samples, true_pi=None, max_iterations=None):
     # initialization
     J = anp.eye(4)
 
-    solver = SteepestDescent(max_iterations=1000)
+    solver = SteepestDescent(max_iterations=max_iterations)
     result = solver.run(problem, initial_point=J)
     J = result.point
     grad_norm = result.gradient_norm
