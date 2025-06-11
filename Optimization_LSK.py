@@ -14,7 +14,7 @@ if __name__== "__main__":
 
     # Optimization Option
     learning_rate = 1e-4
-    max_iteration = 100
+    max_iteration = 10
     gradient_method = True # choose True: "numerical" / False: "analytical"
 
     samples = data.generate_sample_data(true_pi)
@@ -23,7 +23,7 @@ if __name__== "__main__":
     
     """ Riemannian Gradient Descent"""    
     """ exponential map """
-    est_pi = exponential_map.estimate_inertial_parameters(samples, true_pi=None, max_iterations=max_iteration)          
+    est_pi = exponential_map.estimate_inertial_parameters(samples, true_pi=true_pi, max_iterations=max_iteration)          
     """ log_cholesky """
     #est_pi = log_cholesky.log_estimate_inertial_parameters(samples, learning_rate=learning_rate, max_iter=max_iteration, gradient_method=gradient_method, true_pi=true_pi)
 

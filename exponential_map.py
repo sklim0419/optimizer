@@ -1,5 +1,5 @@
 from pymanopt.manifolds import SymmetricPositiveDefinite
-from pymanopt.optimizers import TrustRegions
+from pymanopt.optimizers import SteepestDescent
 from pymanopt import Problem
 from pymanopt.function import autograd
 import autograd.numpy as anp
@@ -40,29 +40,28 @@ def estimate_inertial_parameters(samples, true_pi=None, max_iterations=None):
         return cost_sum / len(samples)
 
     problem = Problem(manifold=manifold, cost=cost)
-
-    # TrustRegions 내의 stopping 조건이 gradient 기반이므로, 반복적으로 run
+    # initialization
     J = anp.eye(4)
-    for i in range(max_iterations):
-        solver = TrustRegions()
-        result = solver.run(problem, initial_point=J)
-        J = result.point
-        grad_norm = result.gradient_norm
-        
-        if grad_norm < 1e-8:  # 조기 종료 조건
-            print(f"Terminated at iteration {i+1} with grad_norm {grad_norm:.2e}")
-            pi_est = pseudo2pi(J)
-            print(pi_est)
-            break
+
+    solver = SteepestDescent(max_iterations=1000)
+    result = solver.run(problem, initial_point=J)
+    J = result.point
+    grad_norm = result.gradient_norm
+    
+    if grad_norm < 1e-8:  # 조기 종료 조건
+        print(f"Terminated at iteration with grad_norm {grad_norm:.2e}")
+        pi_est = pseudo2pi(J)
+        print(pi_est)
+        #break
         
     pi_est = pseudo2pi(J)
 
-    if true_pi is not None:
-        print("\n[True Inertial Parameters]")
-        print(true_pi)
-        print("[Estimated Inertial Parameters]")
-        print(pi_est)
-        print("[Relative Error (%)]")
-        print(100 * anp.abs((pi_est - true_pi) / true_pi))
+    
+    print("\n[True Inertial Parameters]")
+    print(true_pi)
+    print("[Estimated Inertial Parameters]")
+    print(pi_est)
+    print("[Relative Error (%)]")
+    print(100 * anp.abs((pi_est - true_pi) / true_pi))
 
     return pi_est
